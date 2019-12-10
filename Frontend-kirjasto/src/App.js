@@ -1,10 +1,26 @@
 import React, { useState } from 'react'
-import { Query, ApolloConsumer } from 'react-apollo'
+import { Query, ApolloConsumer, Mutation } from 'react-apollo'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import { gql } from 'apollo-boost'
 
+const CREATE_BOOK = gql`
+  mutation createBook($title: String!, $author: String!, $published: Int!, $genres: [String]) {
+    addBook(
+      title: $title,   
+      author: $author,
+      published: $published,
+      genres: $genres
+    ) {
+      title
+      author
+      published
+      id
+      genres
+    }
+  }
+`
 const ALL_AUTHORS = gql`
 {
   allAuthors  {
@@ -58,10 +74,16 @@ const App = () => {
       )}
     </ApolloConsumer>
 
+    <Mutation 
+    mutation={CREATE_BOOK}
+    refetchQueries={[{ query: ALL_BOOKS }]}
+    >
+      {(addBook) =>
       <NewBook
-        show={page === 'add'}
+        addBook={addBook} show={page === 'add'}
       />
-
+      }
+    </Mutation>
     </div>
   )
 }

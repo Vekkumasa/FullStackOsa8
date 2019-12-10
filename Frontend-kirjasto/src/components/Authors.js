@@ -10,7 +10,6 @@ const Authors = ({ result, client, show }) => {
   }
   
   if ( result.loading ) {
-    console.log(result.loading)
     return <div>loading...</div>
   }
   
