@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Query, ApolloConsumer, Mutation } from 'react-apollo'
+import { Query, ApolloConsumer, Mutation, useMutation } from 'react-apollo'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
@@ -21,6 +21,15 @@ const CREATE_BOOK = gql`
     }
   }
 `
+const EDIT_BIRTHYEAR = gql`
+  mutation editAuthor($name: String!, $born: Int!) {
+    editAuthor(name: $name, born: $born) {
+      name
+      born
+    }
+  }
+`
+
 const ALL_AUTHORS = gql`
 {
   allAuthors  {
@@ -45,6 +54,11 @@ const ALL_BOOKS = gql`
 
 const App = () => {
   const [page, setPage] = useState('authors')
+  const [editAuthor] = useMutation(EDIT_BIRTHYEAR, {
+    refetchQueries: [
+      { query: ALL_AUTHORS }
+    ]
+  })
 
   return (
     <div>
@@ -58,7 +72,11 @@ const App = () => {
       {(client =>
         <Query query={ALL_AUTHORS}>
           {(result) =>
-            <Authors result={result} client={client} show={page === 'authors'} />
+            <Authors 
+            result={result} 
+            editAuthor={editAuthor}
+            client={client} 
+            show={page === 'authors'} />
           }
         </Query>
       )}

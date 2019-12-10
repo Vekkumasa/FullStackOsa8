@@ -105,6 +105,7 @@ const typeDefs = gql`
     authorCount: Int!
     allBooks(author: String, genre: String): [Book!]!
     allAuthors: [Author!]!
+    findAuthor(name: String!): Author
   }
 
   type Mutation {
@@ -124,6 +125,7 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     bookCount: () => books.length,
+    findAuthor: (root, args) => authors.find(a => a.name === args.name),
     authorCount: () => authors.length,
     allBooks: (root, args) => {
       if (!args.author && !args.genre) {

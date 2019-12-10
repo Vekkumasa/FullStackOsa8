@@ -1,8 +1,22 @@
 import React, { useState } from 'react'
 import { gql } from 'apollo-boost'
 
-const Authors = ({ result, client, show }) => {
+const FIND_AUTHOR = gql`
+  query findAuthorByName($nameToSearch: String!) {
+    findAuthor(name: $nameToSearch) {
+      name
+      id
+      bookCount
+      born
+    }
+  }
+`
+
+const Authors = ({ result, client, editAuthor, show }) => {
   const [author, setAuthor] = useState(null)
+  const [name, setName] = useState('')
+  const [born, setBorn] = useState('')
+
   const authors = []
 
   if (!show) {
@@ -11,6 +25,15 @@ const Authors = ({ result, client, show }) => {
   
   if ( result.loading ) {
     return <div>loading...</div>
+  }
+
+  const submit = async (e) => {
+    e.preventDefault()
+    console.log('name', name , 'born',  born)
+
+    await editAuthor({
+      variables: { name, born }
+    })
   }
   
   return (
@@ -37,7 +60,29 @@ const Authors = ({ result, client, show }) => {
         </tbody>
       </table>
 
+      <br/>
+      <h2>Set Birthyear</h2>
+        
+          <form onSubmit={submit}>
+            <div>
+              Name:
+              <input value={name}
+              onChange={({ target }) => setName(target.value)}
+              />
+            </div>
+            <div>
+              Born:
+              <input
+              type='Number' 
+              value={born}
+              onChange={({ target }) => setBorn(parseInt(target.value))}
+              />
+            </div>
+            <button type='submit'>edit</button>
+          </form>
+
     </div>
+    
   )
 }
 
