@@ -76,6 +76,7 @@ const App = () => {
             result={result} 
             editAuthor={editAuthor}
             client={client} 
+            ALL_AUTHORS={ALL_AUTHORS}
             show={page === 'authors'} />
           }
         </Query>

@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import { gql } from 'apollo-boost'
+import { Query, ApolloConsumer, Mutation, useMutation } from 'react-apollo'
+import Select from 'react-select'
 
 const FIND_AUTHOR = gql`
   query findAuthorByName($nameToSearch: String!) {
@@ -13,11 +15,9 @@ const FIND_AUTHOR = gql`
 `
 
 const Authors = ({ result, client, editAuthor, show }) => {
-  const [author, setAuthor] = useState(null)
+  const [author, setAuthor] = useState('')
   const [name, setName] = useState('')
   const [born, setBorn] = useState('')
-
-  const authors = []
 
   if (!show) {
     return null
@@ -27,13 +27,30 @@ const Authors = ({ result, client, editAuthor, show }) => {
     return <div>loading...</div>
   }
 
+  const authors = result.data.allAuthors
+  const options = authors.map(a => {
+    return {
+      value: a.name,
+      label: a.name
+    }
+  })
+
+  const valinta = (author) => {
+    setAuthor(author)  
+    console.log('name', author)
+    setName(author.value)
+  }
+  
+  console.log('Authors', authors)
+
   const submit = async (e) => {
     e.preventDefault()
-    console.log('name', name , 'born',  born)
-
+    console.log('name', author , 'born',  born)
     await editAuthor({
       variables: { name, born }
     })
+    setBorn('')
+    setName('')
   }
   
   return (
@@ -65,9 +82,10 @@ const Authors = ({ result, client, editAuthor, show }) => {
         
           <form onSubmit={submit}>
             <div>
-              Name:
-              <input value={name}
-              onChange={({ target }) => setName(target.value)}
+              <Select
+              options={options}
+              value={author}
+              onChange={valinta}
               />
             </div>
             <div>
