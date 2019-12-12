@@ -83,15 +83,24 @@ const resolvers = {
           }
       }
     }, 
+    
     allAuthors: () => Author.find({})
   },
   Author: {
-    bookCount: async root => {
+    bookCount: async root => {     
       const kirjailija = await Author.findOne({ name: root.name })
       const books = await Book.collection.countDocuments({ author: kirjailija._id })
       return books
+    }  
+  },
+  Book: {
+    author: async (root) => {
+      const author = await Author.find({ _id: root.author })
+      return {
+        name: author[0].name,
+        born: author[0].born
+      }
     }
-    
   },
 
   Mutation: {
@@ -110,14 +119,25 @@ const resolvers = {
       return book
     },
 
-    editAuthor: (root, args) => {
-      const author = authors.find(a => a.name === args.name)
+    editAuthor: async (root, args) => {
+      console.log('args', args)
+      const author = await Author.findOne({ name: args.name })
+      console.log('Author', author)
       if (!author) {
         return null
       }
-      const updatedAuthor = { ...author, born: args.born }
-      authors = authors.map(a => a.name === args.name ? updatedAuthor: a)
-      return updatedAuthor
+      console.log('Author', author)
+      author.born = args.born
+      
+      
+      try {
+        await author.save()
+      } catch (error) {
+        throw new UserInputError(error.message, {
+          invalidArgs: args,
+        })
+      }
+      return author
     }
   }
 }
