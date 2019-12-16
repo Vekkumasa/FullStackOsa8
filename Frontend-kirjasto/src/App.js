@@ -58,6 +58,7 @@ const ALL_BOOKS = gql`
     id
     author {
       name
+      born
     }
     genres
   }
@@ -73,6 +74,7 @@ const App = () => {
       { query: ALL_AUTHORS }
     ]
   })
+  const [user, setUser] = useState('')
   const apolloClient = useApolloClient()
 
   const handleError = (error) => {
@@ -97,6 +99,10 @@ const App = () => {
       {errorMessage}
     </div>
 
+  const testi = () => {
+    console.log(token)
+    console.log(user)
+  }
 
   return (
     <div>
@@ -104,7 +110,10 @@ const App = () => {
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
         <button onClick={() => setPage('add')}>add book</button>
+        <button onClick={() => setPage('loginForm')}>Log In</button>
       </div>
+      
+      <h5>User: {user} </h5>
 
       <ApolloConsumer>
       {(client =>
@@ -127,7 +136,8 @@ const App = () => {
             <Books 
             result={result} 
             client={client} 
-            show={page === 'books'} />
+            show={page === 'books'} 
+            />
           }
         </Query>
       )}
@@ -139,13 +149,28 @@ const App = () => {
     >
       {(addBook) =>
       <NewBook
-        addBook={addBook} show={page === 'add'}
+        addBook={addBook} 
+        show={page === 'add'}
       />
       }
     </Mutation>
+
+    <LoginForm
+      show={page === 'loginForm'}
+      login={login}
+      user={user}
+      setUser={setUser}
+      setToken={(token) => setToken(token)}
+      />
     <br/>
     <br/>
+    
     <button onClick={logout}>log out!</button>
+    <br/>
+    <br/>
+    
+    <button onClick={testi}>testi</button>
+    
     </div>
   )
 }

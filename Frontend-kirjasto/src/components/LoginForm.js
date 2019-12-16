@@ -16,6 +16,18 @@ const LoginForm = (props) => {
             props.setToken(token)
             localStorage.setItem('kirjasto-user-token', token)
         }
+        props.setUser(username)
+        setUsername('')
+        setPassword('')
+        
+    }
+
+    if (!props.show) {
+        return null
+      }
+
+    if (props.token) {
+        return null
     }
 
     return (
@@ -29,6 +41,7 @@ const LoginForm = (props) => {
                 </div>
                 <div>
                     password: <input
+                    type='password'
                     value={password}
                     onChange={({ target }) => setPassword(target.value)}
                     />
