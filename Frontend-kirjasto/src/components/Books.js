@@ -11,6 +11,7 @@ const Books = ( {result, client, show} ) => {
     return <div>loading...</div>
   }
 
+  console.log('RESULT', result.data.allBooks)
 
   return (
     <div>
@@ -30,7 +31,7 @@ const Books = ( {result, client, show} ) => {
           {result.data.allBooks.map(a =>
             <tr key={a.title}>
               <td>{a.title}</td>
-              <td>{a.author}</td>
+              <td>{a.author.name}</td>
               <td>{a.published}</td>
             </tr>
           )}

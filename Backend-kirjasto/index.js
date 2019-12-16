@@ -90,7 +90,7 @@ const resolvers = {
     },
     allBooks: async (root, args) => {
       if (!args.author && !args.genre) {
-        return await Book.find({})
+        return await Book.find({}).populate("author")
       } else {
 
         if (!args.author) {
@@ -176,16 +176,15 @@ const resolvers = {
 
     editAuthor: async (root, args, context) => {
       const currentUser = context.currentUser
-      
+      if (!currentUser) {
+        throw new AuthenticationError("not authenticated")
+      }
       const author = await Author.findOne({ name: args.name })
       if (!author) {
         return null
       }
       author.born = args.born
       
-      if (!currentUser) {
-        throw new AuthenticationError("not authenticated")
-      }
       
       try {
         await author.save()

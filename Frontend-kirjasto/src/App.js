@@ -1,9 +1,19 @@
 import React, { useState } from 'react'
-import { Query, ApolloConsumer, Mutation, useMutation } from 'react-apollo'
+import { Query, ApolloConsumer, Mutation } from 'react-apollo'
+import { useQuery, useMutation, useApolloClient } from '@apollo/react-hooks'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import { gql } from 'apollo-boost'
+import LoginForm from './components/LoginForm'
+
+const LOGIN = gql`
+  mutation login ($username: String!, $password: String!) {
+    login(username: $username, password: $password) {
+      value
+    }
+  }
+`
 
 const CREATE_BOOK = gql`
   mutation createBook($title: String!, $author: String!, $published: Int!, $genres: [String]) {
@@ -46,19 +56,47 @@ const ALL_BOOKS = gql`
     title
     published
     id
-    author
+    author {
+      name
+    }
     genres
   }
 }
 `
 
 const App = () => {
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [token, setToken] = useState(null)
   const [page, setPage] = useState('authors')
   const [editAuthor] = useMutation(EDIT_BIRTHYEAR, {
     refetchQueries: [
       { query: ALL_AUTHORS }
     ]
   })
+  const apolloClient = useApolloClient()
+
+  const handleError = (error) => {
+    setErrorMessage(error.graphQLErrors[0].message)
+    setTimeout(() => {
+      setErrorMessage(null)
+    }, 10000)
+  }
+
+  const logout = () => {
+    setToken(null)
+    localStorage.clear()
+    apolloClient.resetStore()
+  }
+
+  const [login] = useMutation(LOGIN, {
+    onError: handleError
+  })
+
+  const errorNotification = () => errorMessage &&
+    <div style={{ color: 'red' }}>
+      {errorMessage}
+    </div>
+
 
   return (
     <div>
@@ -86,7 +124,10 @@ const App = () => {
       {(client =>
         <Query query={ALL_BOOKS}>
           {(result) =>
-            <Books result={result} client={client} show={page === 'books'} />
+            <Books 
+            result={result} 
+            client={client} 
+            show={page === 'books'} />
           }
         </Query>
       )}
@@ -102,6 +143,9 @@ const App = () => {
       />
       }
     </Mutation>
+    <br/>
+    <br/>
+    <button onClick={logout}>log out!</button>
     </div>
   )
 }
