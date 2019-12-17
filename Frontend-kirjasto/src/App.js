@@ -24,7 +24,10 @@ const CREATE_BOOK = gql`
       genres: $genres
     ) {
       title
-      author
+      author {
+        name
+        born
+      }
       published
       id
       genres
@@ -69,11 +72,6 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const [token, setToken] = useState(null)
   const [page, setPage] = useState('authors')
-  const [editAuthor] = useMutation(EDIT_BIRTHYEAR, {
-    refetchQueries: [
-      { query: ALL_AUTHORS }
-    ]
-  })
   const [user, setUser] = useState('')
   const apolloClient = useApolloClient()
 
@@ -83,6 +81,26 @@ const App = () => {
       setErrorMessage(null)
     }, 10000)
   }
+  
+  const authors = useQuery(ALL_AUTHORS)
+  const books = useQuery(ALL_BOOKS)
+  const [addBook] = useMutation(CREATE_BOOK, {
+    onError: handleError,
+    refetchQueries: [
+      { query: ALL_BOOKS },
+      { query: ALL_AUTHORS }
+    ]
+  })
+  const [editAuthor] = useMutation(EDIT_BIRTHYEAR, {
+    onError: handleError,
+    refetchQueries: [
+      { query: ALL_AUTHORS }
+    ]
+  })
+
+  const [login] = useMutation(LOGIN, {
+    onError: handleError
+  })
 
   const logout = () => {
     setToken(null)
@@ -91,19 +109,10 @@ const App = () => {
     setUser('')
   }
 
-  const [login] = useMutation(LOGIN, {
-    onError: handleError
-  })
-
   const errorNotification = () => errorMessage &&
     <div style={{ color: 'red' }}>
       {errorMessage}
     </div>
-
-  const testi = () => {
-    console.log(token)
-    console.log(user)
-  }
 
   return (
     <div>
@@ -113,48 +122,33 @@ const App = () => {
         <button onClick={() => setPage('add')}>add book</button>
         <button onClick={() => setPage('loginForm')}>Log In</button>
       </div>
+
+    <br/>
+    {errorMessage &&
+    <div style={{ color: 'red' }}>
+      {errorMessage}
+      </div>
+    }
       
-      <h5>User: {user} </h5>
+    <h5>User: {user} </h5>
 
-      <ApolloConsumer>
-      {(client =>
-        <Query query={ALL_AUTHORS}>
-          {(result) =>
-            <Authors 
-            result={result} 
-            editAuthor={editAuthor}
-            client={client} 
-            show={page === 'authors'} />
-          }
-        </Query>
-      )}
-    </ApolloConsumer>
+    <Authors 
+      result={authors} 
+      editAuthor={editAuthor} 
+      show={page === 'authors'} 
+    />
 
-    <ApolloConsumer>
-      {(client =>
-        <Query query={ALL_BOOKS}>
-          {(result) =>
-            <Books 
-            result={result} 
-            client={client} 
-            show={page === 'books'} 
-            />
-          }
-        </Query>
-      )}
-    </ApolloConsumer>
-
-    <Mutation 
-    mutation={CREATE_BOOK}
-    refetchQueries={[{ query: ALL_BOOKS }]}
-    >
-      {(addBook) =>
-      <NewBook
-        addBook={addBook} 
-        show={page === 'add'}
-      />
-      }
-    </Mutation>
+    <Books 
+      result={books} 
+      show={page === 'books'} 
+    />
+    
+    <NewBook
+      addBook={addBook} 
+      show={page === 'add'}
+      setPage={setPage}
+      user={user}
+    />
 
     <LoginForm
       show={page === 'loginForm'}
@@ -167,10 +161,6 @@ const App = () => {
     <br/>
     
     <button onClick={logout}>log out!</button>
-    <br/>
-    <br/>
-    
-    <button onClick={testi}>testi</button>
     
     </div>
   )

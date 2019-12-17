@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { gql } from 'apollo-boost'
 import { Query, ApolloConsumer, Mutation, useMutation } from 'react-apollo'
 import Select from 'react-select'
+import { useApolloClient } from '@apollo/react-hooks'
 
 const FIND_AUTHOR = gql`
   query findAuthorByName($nameToSearch: String!) {

@@ -10,11 +10,10 @@ const NewBook = (props) => {
   if (!props.show) {
     return null
   }
+  
 
   const submit = async (e) => {
     e.preventDefault()
-
-    console.log('published: ' , published)
 
     await props.addBook({
       variables: { title, author, published, genres}
@@ -25,6 +24,7 @@ const NewBook = (props) => {
     setAuthor('')
     setGenres([])
     setGenre('')
+    props.setPage('books')
   }
 
   const addGenre = () => {

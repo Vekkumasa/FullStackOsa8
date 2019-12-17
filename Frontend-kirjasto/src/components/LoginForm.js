@@ -15,8 +15,8 @@ const LoginForm = (props) => {
             const token = result.data.login.value
             props.setToken(token)
             localStorage.setItem('kirjasto-user-token', token)
+            props.setUser(username)
         }
-        props.setUser(username)
         setUsername('')
         setPassword('')
         
