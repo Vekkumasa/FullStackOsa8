@@ -119,8 +119,15 @@ const App = () => {
       <div>
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
+        {user === '' ? 
+        <button onClick={() => setPage('loginForm')}>Log In</button> 
+        :
+        <div>
         <button onClick={() => setPage('add')}>add book</button>
-        <button onClick={() => setPage('loginForm')}>Log In</button>
+        <button onClick={logout}>log out!</button>
+        </div>
+      }
+        
       </div>
 
     <br/>
@@ -159,8 +166,6 @@ const App = () => {
       />
     <br/>
     <br/>
-    
-    <button onClick={logout}>log out!</button>
     
     </div>
   )
