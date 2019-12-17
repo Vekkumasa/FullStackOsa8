@@ -88,6 +88,7 @@ const App = () => {
     setToken(null)
     localStorage.clear()
     apolloClient.resetStore()
+    setUser('')
   }
 
   const [login] = useMutation(LOGIN, {
