@@ -1,12 +1,24 @@
 import React, { useState } from 'react'
 import { Query, ApolloConsumer, Mutation } from 'react-apollo'
-import { useQuery, useMutation, useApolloClient } from '@apollo/react-hooks'
+import { useQuery, useMutation, useApolloClient, useSubscription } from '@apollo/react-hooks'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import { gql } from 'apollo-boost'
 import LoginForm from './components/LoginForm'
 import Recommended from './components/Recommended'
+
+const BOOK_DETAILS = gql`
+fragment BookDetails on Book {
+  title
+  published
+  author {
+    name
+    born
+  }
+  genres
+}
+`
 
 const LOGIN = gql`
   mutation login ($username: String!, $password: String!) {
@@ -30,7 +42,6 @@ const CREATE_BOOK = gql`
         born
       }
       published
-      id
       genres
     }
   }
@@ -75,13 +86,26 @@ const ME = gql`
     }
   }
 `
+const BOOK_ADDED = gql`
+  subscription {
+    bookAdded {
+      ...BookDetails
+    }
+  }
+${BOOK_DETAILS}
+`
 
 const App = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const [token, setToken] = useState(null)
   const [page, setPage] = useState('authors')
   const [user, setUser] = useState('')
+
   const apolloClient = useApolloClient()
+
+  const me = useQuery(ME)
+  const authors = useQuery(ALL_AUTHORS)
+  const books = useQuery(ALL_BOOKS)
 
   const handleError = (error) => {
     setErrorMessage(error.graphQLErrors[0].message)
@@ -90,17 +114,36 @@ const App = () => {
     }, 10000)
   }
 
-  const me = useQuery(ME)
-  const authors = useQuery(ALL_AUTHORS)
-  const books = useQuery(ALL_BOOKS)
+  const updateCacheWith = (addedBook) => {
+    const includedIn = (set, object) =>
+      set.map(p => p.id).includes(object.id)  
+
+    const dataInStore = apolloClient.readQuery({ query: ALL_BOOKS })
+    if (!includedIn(dataInStore.allBooks, addedBook)) {
+      dataInStore.allBooks.push(addedBook)
+      apolloClient.writeQuery({
+        query: ALL_BOOKS,
+        data: dataInStore
+      })
+    }   
+  }
+
+  useSubscription(BOOK_ADDED, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      const addedBook = subscriptionData.data.bookAdded
+      window.alert(`${addedBook.title} added`)
+      updateCacheWith(addedBook)
+      setPage('books')
+    }
+  })
 
   const [addBook] = useMutation(CREATE_BOOK, {
     onError: handleError,
-    refetchQueries: [
-      { query: ALL_BOOKS },
-      { query: ALL_AUTHORS }
-    ]
+    update: (store, response) => {
+      updateCacheWith(response.data.addBook)
+    }
   })
+
   const [editAuthor] = useMutation(EDIT_BIRTHYEAR, {
     onError: handleError,
     refetchQueries: [
