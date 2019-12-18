@@ -1,7 +1,28 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { gql } from 'apollo-boost'
+import { useQuery } from '@apollo/react-hooks'
+
+const ALL_BOOKS = gql`
+query allBooks($genre: String) {
+  allBooks(genre: $genre)  {
+    title
+    published
+    id
+    author {
+      name
+      born
+    }
+    genres
+  }
+}
+`
 
 const Books = ( {result, client, show} ) => {
+  const [genre, setGenre] = useState('all')
+
+  const rajatut = useQuery(ALL_BOOKS, {
+    variables: { genre: genre }
+  })
 
   if (!show) {
     return null
@@ -11,12 +32,27 @@ const Books = ( {result, client, show} ) => {
     return <div>loading...</div>
   }
 
-  console.log('RESULT', result.data.allBooks)
+  const haku = (genre) => () => {
+    setGenre(genre)
+  }
+
+  const kaikki = []
+  result.data.allBooks.forEach(b => {
+    b.genres.forEach(g => {
+      kaikki.push(g)
+    })
+  })
+  const noDupes = new Set(kaikki)
+  const genret = [...noDupes]
 
   return (
     <div>
-      <h2>books</h2>
+      <h2>Books</h2>
 
+      <button onClick={() => setGenre('all')}>all genres</button>
+      {genret.map(genre =>
+          <button key={genre} onClick={haku(genre)}>{genre}</button>
+        )}
       <table>
         <tbody>
           <tr>
@@ -28,16 +64,28 @@ const Books = ( {result, client, show} ) => {
               published
             </th>
           </tr>
-          {result.data.allBooks.map(a =>
+          {genre === 'all' ?
+          result.data.allBooks.map(a =>
             <tr key={a.title}>
               <td>{a.title}</td>
               <td>{a.author.name}</td>
               <td>{a.published}</td>
             </tr>
-          )}
+          )
+          :
+          rajatut.data.allBooks.map(a =>
+            <tr key={a.title}>
+              <td>{a.title}</td>
+              <td>{a.author.name}</td>
+              <td>{a.published}</td>
+            </tr>
+          )
+          }
+          
         </tbody>
       </table>
-    </div>
+    
+  </div>
   )
 }
 

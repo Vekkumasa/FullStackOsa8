@@ -54,8 +54,8 @@ const ALL_AUTHORS = gql`
 }
 `
 const ALL_BOOKS = gql`
-{
-  allBooks  {
+query allBooks($genre: String) {
+  allBooks(genre: $genre)  {
     title
     published
     id
@@ -159,6 +159,7 @@ const App = () => {
 
     <LoginForm
       show={page === 'loginForm'}
+      setPage={setPage}
       login={login}
       user={user}
       setUser={setUser}
