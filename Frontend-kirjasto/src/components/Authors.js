@@ -28,8 +28,6 @@ const Authors = ({ result, client, editAuthor, show }) => {
     return <div>loading...</div>
   }
 
-  console.log('AUTHORS', result)
-
   const authors = result.data.allAuthors
   const options = authors.map(a => {
     return {

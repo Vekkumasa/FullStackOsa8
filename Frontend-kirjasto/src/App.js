@@ -6,6 +6,7 @@ import Books from './components/Books'
 import NewBook from './components/NewBook'
 import { gql } from 'apollo-boost'
 import LoginForm from './components/LoginForm'
+import Recommended from './components/Recommended'
 
 const LOGIN = gql`
   mutation login ($username: String!, $password: String!) {
@@ -54,18 +55,25 @@ const ALL_AUTHORS = gql`
 }
 `
 const ALL_BOOKS = gql`
-query allBooks($genre: String) {
-  allBooks(genre: $genre)  {
-    title
-    published
-    id
-    author {
-      name
-      born
+  query allBooks($genre: String) {
+    allBooks(genre: $genre)  {
+      title
+      published
+      id
+      author {
+        name
+        born
+      }
+      genres
     }
-    genres
   }
-}
+`
+const ME = gql`
+  {
+    me {
+      favoriteGenre
+    }
+  }
 `
 
 const App = () => {
@@ -81,9 +89,11 @@ const App = () => {
       setErrorMessage(null)
     }, 10000)
   }
-  
+
+  const me = useQuery(ME)
   const authors = useQuery(ALL_AUTHORS)
   const books = useQuery(ALL_BOOKS)
+
   const [addBook] = useMutation(CREATE_BOOK, {
     onError: handleError,
     refetchQueries: [
@@ -124,6 +134,7 @@ const App = () => {
         :
         <div>
         <button onClick={() => setPage('add')}>add book</button>
+        <button onClick={() => setPage('recommended')}>Recommended</button>
         <button onClick={logout}>log out!</button>
         </div>
       }
@@ -156,6 +167,12 @@ const App = () => {
       setPage={setPage}
       user={user}
     />
+
+    <Recommended
+      show={page === 'recommended'}
+      result={books}
+      me={me}
+      />
 
     <LoginForm
       show={page === 'loginForm'}
