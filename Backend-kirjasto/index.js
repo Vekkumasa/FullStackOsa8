@@ -112,7 +112,7 @@ const resolvers = {
       }
     }, 
     
-    allAuthors: () => Author.find({})
+    allAuthors: () => Author.find({}).populate('bookCount')
   },
   Author: {
     bookCount: async root => {     
