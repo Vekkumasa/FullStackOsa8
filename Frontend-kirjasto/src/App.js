@@ -66,15 +66,10 @@ const ALL_AUTHORS = gql`
 }
 `
 const ALL_BOOKS = gql`
-  query allBooks($genre: String) {
-    allBooks(genre: $genre)  {
+  query {
+    allBooks{
       title
       published
-      id
-      author {
-        name
-        born
-      }
       genres
     }
   }
@@ -107,7 +102,8 @@ const App = () => {
   const authors = useQuery(ALL_AUTHORS)
   const books = useQuery(ALL_BOOKS)
 
-  console.log('AUTHORIAAA', authors)
+  console.log('BOOKS' , books)
+  console.log('Authors', authors)
   const handleError = (error) => {
     setErrorMessage(error.graphQLErrors[0].message)
     setTimeout(() => {

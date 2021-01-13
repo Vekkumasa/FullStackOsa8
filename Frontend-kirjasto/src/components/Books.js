@@ -68,7 +68,6 @@ const Books = ( {result, client, show} ) => {
           result.data.allBooks.map(a =>
             <tr key={a.title}>
               <td>{a.title}</td>
-              <td>{a.author.name}</td>
               <td>{a.published}</td>
             </tr>
           )
@@ -76,7 +75,6 @@ const Books = ( {result, client, show} ) => {
           rajatut.data.allBooks.map(a =>
             <tr key={a.title}>
               <td>{a.title}</td>
-              <td>{a.author.name}</td>
               <td>{a.published}</td>
             </tr>
           )
